@@ -1,0 +1,52 @@
+{
+    "rooms": [
+      {
+        "id": "ROOM-VI-22-9-8",
+        "name": "VIP Room 101",
+        "capacity": 2,
+        "category": "VIP",
+        "price": 2500000,
+        "status": "Available"
+      },
+      {
+        "id": "ROOM-RE-18-5-7",
+        "name": "Regular Ward 201",
+        "capacity": 4,
+        "category": "Regular",
+        "price": 1200000,
+        "status": "Occupied"
+      },
+      {
+        "id": "ROOM-IC-9-3-6",
+        "name": "ICU Suite 301",
+        "capacity": 1,
+        "category": "ICU",
+        "price": 3500000,
+        "status": "Maintenance"
+      },
+      {
+        "id": "ROOM-VI-22-9-7",
+        "name": "VIP Room 102",
+        "capacity": 2,
+        "category": "VIP",
+        "price": 2750000,
+        "status": "Available"
+      },
+      {
+        "id": "ROOM-EM-5-13-10",
+        "name": "Emergency ICU",
+        "capacity": 2,
+        "category": "ICU",
+        "price": 4000000,
+        "status": "Occupied"
+      },
+      {
+        "id": "ROOM-EM-5-13-1",
+        "name": "Emergency ICU",
+        "capacity": 2,
+        "category": "ICU",
+        "price": 4000000,
+        "status": "Occupied"
+      }
+    ]
+  }

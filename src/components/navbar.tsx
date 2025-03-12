@@ -1,5 +1,6 @@
 'use client';
 import React, { useState, useEffect, useRef } from 'react';
+import Link from 'next/link';
 
 type MenuItem = {
   label: string;
@@ -8,24 +9,24 @@ type MenuItem = {
 };
 
 const menuItems: MenuItem[] = [
-  { label: 'Dashboard', href: '/dashboard' },
+  { label: 'Dashboard', href: '/' },
   {
     label: 'Master',
     subMenu: [
-      { label: 'Data Pasien', href: '/master/pasien' },
+      { label: 'Data Pasien', href: '/users' },
       { label: 'Data Dokter', href: '/master/dokter' },
       { label: 'Data Perawat', href: '/master/perawat' },
       { label: 'Data Obat', href: '/master/obat' },
-      { label: 'Data Ruangan', href: '/master/ruangan' },
+      { label: 'Data Ruangan', href: '/room/list' },
     ],
   },
   {
     label: 'Pelayanan',
     subMenu: [
-      { label: 'Pendaftaran Pasien', href: '/pelayanan/pendaftaran' },
+      { label: 'Pendaftaran Pasien', href: '/pelayanan/pendaftaran-pasien' },
       { label: 'Rekam Medis', href: '/pelayanan/rekam-medis' },
       { label: 'Jadwal Dokter', href: '/pelayanan/jadwal-dokter' },
-      { label: 'Rawat Inap', href: '/pelayanan/rawat-inap' },
+      { label: 'Rawat Inap', href: '/booking/list' },
     ],
   },
   {

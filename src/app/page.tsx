@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, JSX } from 'react';
 import {
   BellIcon,
   UserCircleIcon,
@@ -301,57 +301,60 @@ export default function DashboardLayout() {
         </div>
       </div>
 
-      {/* Chart Pie Penyakit & Line Chart Pemasukan */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Chart Pie Penyakit */}
-        <div
-          className={`p-6 rounded-xl shadow-sm ${
-            isDarkMode ? 'bg-gray-800' : 'bg-white'
-          } h-96`}
-        >
-          <h2 className="text-xl font-semibold mb-4">Distribusi Penyakit</h2>
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie
-                data={dummyData.diseaseData}
-                cx="50%"
-                cy="50%"
-                outerRadius={80}
-                fill="#8884d8"
-                dataKey="value"
-                label
-              >
-                {dummyData.diseaseData.map((entry, index) => (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={COLORS[index % COLORS.length]}
-                  />
-                ))}
-              </Pie>
-              <Tooltip contentStyle={{ color: '#000' }} />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
-        {/* Line Chart Pemasukan Bulanan */}
-        <div
-          className={`p-6 rounded-xl shadow-sm ${
-            isDarkMode ? 'bg-gray-800' : 'bg-white'
-          } h-96`}
-        >
-          <h2 className="text-xl font-semibold mb-4">Pemasukan Bulanan</h2>
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={dummyData.revenueData}>
-              <XAxis dataKey="name" stroke={isDarkMode ? '#fff' : '#000'} />
-              <YAxis stroke={isDarkMode ? '#fff' : '#000'} />
-              <Tooltip contentStyle={{ color: '#000' }} />
-              <Line type="monotone" dataKey="uv" stroke="#3B82F6" />
-            </LineChart>
-          </ResponsiveContainer>
+        {/* Chart Pie Penyakit & Line Chart Pemasukan */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Chart Pie Penyakit */}
+          <div
+            className={`p-6 rounded-xl shadow-sm ${
+              isDarkMode ? 'bg-gray-800' : 'bg-white'
+            } h-96`}
+          >
+            <h2 className="text-xl font-semibold mb-4">Distribusi Penyakit</h2>
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={dummyData.diseaseData}
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={80}
+                  fill="#8884d8"
+                  dataKey="value"
+                  label
+                >
+                  {dummyData.diseaseData.map((entry, index) => (
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={COLORS[index % COLORS.length]}
+                    />
+                  ))}
+                </Pie>
+                <Tooltip contentStyle={{ color: '#000' }} />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+          {/* Line Chart Pemasukan Bulanan */}
+          <div
+            className={`p-6 rounded-xl shadow-sm ${
+              isDarkMode ? 'bg-gray-800' : 'bg-white'
+            } h-96`}
+          >
+            <h2 className="text-xl font-semibold mb-4">Pemasukan Bulanan</h2>
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={dummyData.revenueData}>
+                <XAxis dataKey="name" stroke={isDarkMode ? '#fff' : '#000'} />
+                <YAxis stroke={isDarkMode ? '#fff' : '#000'} />
+                <Tooltip contentStyle={{ color: '#000' }} />
+                <Line type="monotone" dataKey="uv" stroke="#3B82F6" />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
         </div>
       </div>
-    </div>
   );
 }
+
+// Definisikan tipe untuk trend
+type TrendType = 'up' | 'down' | 'stable';
 
 // Komponen StatCard Terpisah
 const StatCard = ({
@@ -364,7 +367,7 @@ const StatCard = ({
   icon: JSX.Element;
   title: string;
   value: number;
-  trend: string;
+  trend: TrendType; // Gunakan tipe TrendType di sini
   isDarkMode: boolean;
 }) => {
   return (
@@ -407,6 +410,7 @@ const StatCard = ({
   );
 };
 
+// Objek trendColors tetap sama
 const trendColors = {
   up: { bg: 'bg-green-100', text: 'text-green-600' },
   down: { bg: 'bg-red-100', text: 'text-red-600' },
