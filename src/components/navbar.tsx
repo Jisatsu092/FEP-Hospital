@@ -7,9 +7,10 @@ type MenuItem = {
   href?: string;
   subMenu?: MenuItem[];
 };
+// const [IsloggIn, setIsloggIn] = useState(false);
 
 const menuItems: MenuItem[] = [
-  { label: 'Dashboard', href: '/' },
+  { label: 'Dashboard', href: '/dashboard' },
   {
     label: 'Master',
     subMenu: [
