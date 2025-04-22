@@ -1,6 +1,9 @@
+// components/Navbar.tsx
 'use client';
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { BellIcon, UserCircleIcon } from '@heroicons/react/24/outline';
 
 type MenuItem = {
   label: string;
@@ -9,7 +12,7 @@ type MenuItem = {
 };
 
 const menuItems: MenuItem[] = [
-  { label: 'Dashboard', href: '/' },
+  { label: 'Dashboard', href: '/dashboard' },
   {
     label: 'Master',
     subMenu: [
@@ -39,22 +42,206 @@ const menuItems: MenuItem[] = [
   },
 ];
 
+const notificationsDummyData = [
+  { id: 1, title: 'Pasien Baru', message: 'Andi Pratama mendaftar jam 09:00' },
+  { id: 2, title: 'Stok Obat', message: 'Paracetamol tersisa 23 tablet' },
+];
+
 const Navbar: React.FC = () => {
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [notifications, setNotifications] = useState(notificationsDummyData);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // Initial state false
+
+  const notificationDropdownRef = useRef<HTMLDivElement>(null);
+  const profileDropdownRef = useRef<HTMLDivElement>(null);
+
+  // Cek login setelah mount
+  useEffect(() => {
+    const storedLogin = localStorage.getItem('isLoggedIn');
+    if (storedLogin === 'true') {
+      setIsLoggedIn(true);
+    }
+  }, []);
+
+  // Simpan state ke localStorage
+  useEffect(() => {
+    localStorage.setItem('isLoggedIn', JSON.stringify(isLoggedIn));
+  }, [isLoggedIn]);
+
+  const handleLogin = () => {
+    setIsLoggedIn(true);
+    router.push('/dashboard');
+  };
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    router.push('/');
+  };
+
+  const handleNotificationClick = (id: number) => {
+    setNotifications((prev) => prev.filter((notif) => notif.id !== id));
+    setIsNotificationOpen(false);
+  };
 
   return (
-    <nav className="bg-blue-600 shadow-md">
+    <nav className={`shadow-md ${isDarkMode ? 'bg-gray-900' : 'bg-blue-600'}`}>
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
         <div className="text-xl font-bold text-white">My Hospital</div>
 
-        {/* Menu Desktop */}
-        <ul className="hidden md:flex space-x-6">
+        {/* Menu Desktop - Selalu render, kontrol dengan CSS */}
+        <ul className={`hidden md:flex space-x-6 ${isLoggedIn ? 'visible' : 'invisible'}`}>
           {menuItems.map((item, index) => (
             <MenuItem key={index} item={item} />
           ))}
         </ul>
 
-        {/* Menu Mobile */}
+        {/* Right-side Icons */}
+        <div className="hidden md:flex items-center gap-4">
+          {/* Dark Mode Toggle - Render tapi sembunyikan jika belum login */}
+          <button
+            className={`${isLoggedIn ? 'block' : 'hidden'} p-2 rounded-full hover:bg-blue-700 transition-all`}
+            onClick={() => setIsDarkMode(!isDarkMode)}
+          >
+            {isDarkMode ? (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6 text-white"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+                />
+              </svg>
+            ) : (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-6 w-6 text-white"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+                />
+              </svg>
+            )}
+          </button>
+
+          {/* Notifikasi - Sembunyikan jika belum login */}
+          <div className={`${isLoggedIn ? 'block' : 'hidden'} relative`} ref={notificationDropdownRef}>
+            <button
+              onClick={() => setIsNotificationOpen(!isNotificationOpen)}
+              className="relative p-2 hover:bg-blue-700 rounded-full transition-all"
+            >
+              <BellIcon className="h-6 w-6 text-white" />
+              {notifications.length > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full text-xs px-1.5">
+                  {notifications.length}
+                </span>
+              )}
+            </button>
+            {isNotificationOpen && (
+              <div
+                className={`absolute right-0 top-10 w-80 ${
+                  isDarkMode ? 'bg-gray-800' : 'bg-white'
+                } rounded-xl shadow-lg p-4 z-50`}
+              >
+                <h3 className="font-semibold mb-4 text-gray-700 dark:text-white">
+                  Notifikasi Terbaru
+                </h3>
+                <div className="space-y-3">
+                  {notifications.map((notif) => (
+                    <div
+                      key={notif.id}
+                      className={`p-3 rounded-lg cursor-pointer ${
+                        isDarkMode
+                          ? 'bg-gray-700 hover:bg-gray-600 text-white'
+                          : 'bg-gray-50 hover:bg-gray-100'
+                      }`}
+                      onClick={() => handleNotificationClick(notif.id)}
+                    >
+                      <p className="text-sm font-medium">{notif.title}</p>
+                      <p className="text-sm">{notif.message}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Profile/Login Section */}
+          <div className="flex items-center gap-4">
+            {isLoggedIn ? (
+              <div className="relative" ref={profileDropdownRef}>
+                <button
+                  onClick={() => setIsProfileOpen(!isProfileOpen)}
+                  className="flex items-center gap-2 hover:bg-blue-700 px-4 py-2 rounded-lg transition-all"
+                >
+                  <UserCircleIcon className="h-8 w-8 text-white" />
+                  <span className="text-white">Dr. Sarah Wijaya</span>
+                </button>
+                {isProfileOpen && (
+                  <div
+                    className={`absolute right-0 mt-2 w-48 ${
+                      isDarkMode ? 'bg-gray-800' : 'bg-white'
+                    } rounded-md shadow-lg py-1 z-50`}
+                  >
+                    <a
+                      href="#"
+                      className={`block px-4 py-2 ${
+                        isDarkMode
+                          ? 'text-white hover:bg-gray-700'
+                          : 'text-gray-700 hover:bg-blue-100'
+                      } transition-colors duration-200`}
+                      onClick={() => setIsProfileOpen(false)}
+                    >
+                      Pengaturan
+                    </a>
+                    <a
+                      href="#"
+                      className={`block px-4 py-2 ${
+                        isDarkMode
+                          ? 'text-white hover:bg-gray-700'
+                          : 'text-gray-700 hover:bg-blue-100'
+                      } transition-colors duration-200`}
+                      onClick={handleLogout}
+                    >
+                      Logout
+                    </a>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <>
+                <Link href="/register">
+                  <button className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-all">
+                    Daftar
+                  </button>
+                </Link>
+                <button
+                  onClick={handleLogin}
+                  className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-all"
+                >
+                  Masuk
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Mobile Menu */}
         <div className="md:hidden">
           <button
             onClick={() => setIsOpen(!isOpen)}
@@ -94,11 +281,13 @@ const Navbar: React.FC = () => {
           </button>
         </div>
 
-        {/* Mobile Menu */}
+        {/* Mobile Menu Content - Kontrol dengan CSS */}
         <div
           className={`${
             isOpen ? 'block' : 'hidden'
-          } md:hidden absolute top-16 left-0 w-full bg-white shadow-lg`}
+          } md:hidden absolute top-16 left-0 w-full bg-white shadow-lg ${
+            isLoggedIn ? 'visible' : 'invisible'
+          }`}
         >
           <ul className="py-4">
             {menuItems.map((item, index) => (
@@ -115,14 +304,12 @@ const MenuItem: React.FC<{ item: MenuItem }> = ({ item }) => {
   const [isSubMenuOpen, setIsSubMenuOpen] = useState(false);
   const ref = useRef<HTMLLIElement>(null);
 
-  // Menutup submenu saat klik di luar
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (ref.current && !ref.current.contains(event.target as Node)) {
         setIsSubMenuOpen(false);
       }
     };
-
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
@@ -157,8 +344,8 @@ const MenuItem: React.FC<{ item: MenuItem }> = ({ item }) => {
           <ul
             className="absolute right-0 mt-2 bg-white shadow-lg rounded-md py-2 w-48 z-50 overflow-hidden animate-fadeIn"
             style={{
-              maxWidth: 'calc(100vw - 2rem)', // Memastikan tidak melebihi lebar viewport
-              right: '0', // Menyesuaikan posisi ke kanan jika diperlukan
+              maxWidth: 'calc(100vw - 2rem)',
+              right: '0',
             }}
           >
             {item.subMenu.map((subItem, index) => (
@@ -176,7 +363,6 @@ const MenuItem: React.FC<{ item: MenuItem }> = ({ item }) => {
       </li>
     );
   }
-
   return (
     <li>
       <a
@@ -218,7 +404,6 @@ const MobileMenuItem: React.FC<{ item: MenuItem }> = ({ item }) => {
       </li>
     );
   }
-
   return (
     <li>
       <a
