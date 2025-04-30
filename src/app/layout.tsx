@@ -1,10 +1,11 @@
+
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Navbar from "../components/navbar";
 import "./globals.css";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
+import ClientWrapper from "../components/ClientWrapper";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -29,16 +30,8 @@ export default function RootLayout({
     <html lang="en">
       <head />
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        {/* Wrapper untuk konten */}
-        <div>
-          {/* Navbar */}
-          <Navbar />
-
-          {/* Section untuk konten utama */}
-          <section>{children}</section>
-        </div>
-
-        {/* ToastContainer untuk notifikasi */}
+        <Navbar />  
+        <ClientWrapper>{children}</ClientWrapper>
         <ToastContainer />
       </body>
     </html>

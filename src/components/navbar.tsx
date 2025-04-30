@@ -54,32 +54,30 @@ const Navbar: React.FC = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [notifications, setNotifications] = useState(notificationsDummyData);
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // Initial state false
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userData, setUserData] = useState<any>(null);
 
   const notificationDropdownRef = useRef<HTMLDivElement>(null);
   const profileDropdownRef = useRef<HTMLDivElement>(null);
 
-  // Cek login setelah mount
   useEffect(() => {
-    const storedLogin = localStorage.getItem('isLoggedIn');
-    if (storedLogin === 'true') {
+    const accessToken = localStorage.getItem('accessToken');
+    const user = localStorage.getItem('user');
+    
+    if (accessToken) {
       setIsLoggedIn(true);
+      if (user) {
+        setUserData(JSON.parse(user));
+      }
     }
   }, []);
 
-  // Simpan state ke localStorage
-  useEffect(() => {
-    localStorage.setItem('isLoggedIn', JSON.stringify(isLoggedIn));
-  }, [isLoggedIn]);
-
-  const handleLogin = () => {
-    setIsLoggedIn(true);
-    router.push('/dashboard');
-  };
-
   const handleLogout = () => {
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('user');
     setIsLoggedIn(false);
-    router.push('/');
+    setUserData(null);
+    router.push('/login');
   };
 
   const handleNotificationClick = (id: number) => {
@@ -92,16 +90,15 @@ const Navbar: React.FC = () => {
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
         <div className="text-xl font-bold text-white">My Hospital</div>
 
-        {/* Menu Desktop - Selalu render, kontrol dengan CSS */}
+        {/* Desktop Menu */}
         <ul className={`hidden md:flex space-x-6 ${isLoggedIn ? 'visible' : 'invisible'}`}>
           {menuItems.map((item, index) => (
             <MenuItem key={index} item={item} />
           ))}
         </ul>
 
-        {/* Right-side Icons */}
+        {/* Right Side Controls */}
         <div className="hidden md:flex items-center gap-4">
-          {/* Dark Mode Toggle - Render tapi sembunyikan jika belum login */}
           <button
             className={`${isLoggedIn ? 'block' : 'hidden'} p-2 rounded-full hover:bg-blue-700 transition-all`}
             onClick={() => setIsDarkMode(!isDarkMode)}
@@ -139,7 +136,6 @@ const Navbar: React.FC = () => {
             )}
           </button>
 
-          {/* Notifikasi - Sembunyikan jika belum login */}
           <div className={`${isLoggedIn ? 'block' : 'hidden'} relative`} ref={notificationDropdownRef}>
             <button
               onClick={() => setIsNotificationOpen(!isNotificationOpen)}
@@ -181,7 +177,6 @@ const Navbar: React.FC = () => {
             )}
           </div>
 
-          {/* Profile/Login Section */}
           <div className="flex items-center gap-4">
             {isLoggedIn ? (
               <div className="relative" ref={profileDropdownRef}>
@@ -189,8 +184,18 @@ const Navbar: React.FC = () => {
                   onClick={() => setIsProfileOpen(!isProfileOpen)}
                   className="flex items-center gap-2 hover:bg-blue-700 px-4 py-2 rounded-lg transition-all"
                 >
-                  <UserCircleIcon className="h-8 w-8 text-white" />
-                  <span className="text-white">Dr. Sarah Wijaya</span>
+                  {userData?.image ? (
+                    <img
+                      src={userData.image}
+                      alt="Profile"
+                      className="h-8 w-8 rounded-full"
+                    />
+                  ) : (
+                    <UserCircleIcon className="h-8 w-8 text-white" />
+                  )}
+                  <span className="text-white">
+                    {userData?.firstName || 'Account'}
+                  </span>
                 </button>
                 {isProfileOpen && (
                   <div
@@ -198,8 +203,8 @@ const Navbar: React.FC = () => {
                       isDarkMode ? 'bg-gray-800' : 'bg-white'
                     } rounded-md shadow-lg py-1 z-50`}
                   >
-                    <a
-                      href="#"
+                    <Link
+                      href="/profile"
                       className={`block px-4 py-2 ${
                         isDarkMode
                           ? 'text-white hover:bg-gray-700'
@@ -208,18 +213,17 @@ const Navbar: React.FC = () => {
                       onClick={() => setIsProfileOpen(false)}
                     >
                       Pengaturan
-                    </a>
-                    <a
-                      href="#"
-                      className={`block px-4 py-2 ${
+                    </Link>
+                    <button
+                      onClick={handleLogout}
+                      className={`w-full text-left px-4 py-2 ${
                         isDarkMode
                           ? 'text-white hover:bg-gray-700'
                           : 'text-gray-700 hover:bg-blue-100'
                       } transition-colors duration-200`}
-                      onClick={handleLogout}
                     >
                       Logout
-                    </a>
+                    </button>
                   </div>
                 )}
               </div>
@@ -230,18 +234,17 @@ const Navbar: React.FC = () => {
                     Daftar
                   </button>
                 </Link>
-                <button
-                  onClick={handleLogin}
-                  className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-all"
-                >
-                  Masuk
-                </button>
+                <Link href="/login">
+                  <button className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-all">
+                    Masuk
+                  </button>
+                </Link>
               </>
             )}
           </div>
         </div>
 
-        {/* Mobile Menu */}
+        {/* Mobile Menu Button */}
         <div className="md:hidden">
           <button
             onClick={() => setIsOpen(!isOpen)}
@@ -281,7 +284,7 @@ const Navbar: React.FC = () => {
           </button>
         </div>
 
-        {/* Mobile Menu Content - Kontrol dengan CSS */}
+        {/* Mobile Menu Content */}
         <div
           className={`${
             isOpen ? 'block' : 'hidden'
@@ -341,18 +344,12 @@ const MenuItem: React.FC<{ item: MenuItem }> = ({ item }) => {
           </svg>
         </button>
         {isSubMenuOpen && (
-          <ul
-            className="absolute right-0 mt-2 bg-white shadow-lg rounded-md py-2 w-48 z-50 overflow-hidden animate-fadeIn"
-            style={{
-              maxWidth: 'calc(100vw - 2rem)',
-              right: '0',
-            }}
-          >
+          <ul className="absolute right-0 mt-2 bg-white shadow-lg rounded-md py-2 w-48 z-50">
             {item.subMenu.map((subItem, index) => (
               <li key={index}>
                 <a
                   href={subItem.href}
-                  className="block px-4 py-2 text-gray-700 hover:bg-blue-100 hover:text-blue-800 transition-colors duration-200"
+                  className="block px-4 py-2 text-gray-700 hover:bg-blue-100 hover:text-blue-800"
                 >
                   {subItem.label}
                 </a>
@@ -367,7 +364,7 @@ const MenuItem: React.FC<{ item: MenuItem }> = ({ item }) => {
     <li>
       <a
         href={item.href}
-        className="text-white hover:text-gray-200 transition-colors duration-200"
+        className="text-white hover:text-gray-200"
       >
         {item.label}
       </a>
@@ -383,7 +380,7 @@ const MobileMenuItem: React.FC<{ item: MenuItem }> = ({ item }) => {
       <li>
         <button
           onClick={() => setIsSubMenuOpen(!isSubMenuOpen)}
-          className="w-full text-left px-4 py-2 text-gray-700 hover:bg-blue-100 hover:text-blue-800 transition-colors duration-200"
+          className="w-full text-left px-4 py-2 text-gray-700 hover:bg-blue-100"
         >
           {item.label}
         </button>
@@ -393,7 +390,7 @@ const MobileMenuItem: React.FC<{ item: MenuItem }> = ({ item }) => {
               <li key={index}>
                 <a
                   href={subItem.href}
-                  className="block px-4 py-2 text-gray-700 hover:bg-blue-100 hover:text-blue-800 rounded transition-colors duration-200"
+                  className="block px-4 py-2 text-gray-700 hover:bg-blue-100"
                 >
                   {subItem.label}
                 </a>
@@ -408,7 +405,7 @@ const MobileMenuItem: React.FC<{ item: MenuItem }> = ({ item }) => {
     <li>
       <a
         href={item.href}
-        className="block px-4 py-2 text-gray-700 hover:bg-blue-100 hover:text-blue-800 transition-colors duration-200"
+        className="block px-4 py-2 text-gray-700 hover:bg-blue-100"
       >
         {item.label}
       </a>
